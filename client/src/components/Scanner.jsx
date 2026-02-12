@@ -30,7 +30,7 @@ const Scanner = () => {
             // Play success sound?
         } catch (err) {
             console.error(err);
-            const msg = err.response?.data?.error || 'Scan Failed';
+            const msg = err.response?.data?.detail || err.response?.data?.error || 'Scan Failed';
             const codeErr = err.response?.data?.code;
             setScanResult({ type: 'error', message: msg, code: codeErr, member: err.response?.data?.member });
         } finally {

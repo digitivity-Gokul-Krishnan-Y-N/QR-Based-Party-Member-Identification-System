@@ -129,19 +129,24 @@ async def scan_qr(request: ScanRequest):
     now = datetime.now()
     today_str = now.strftime("%Y-%m-%d")
     
-    # Check if already scanned today - REMOVED to allow multiple scans per day (e.g. multiple meetings)
-    # last_scanned = str(member.get('Last Scanned At', ''))
-    # if last_scanned:
-    #     try:
-    #         if last_scanned.startswith(today_str):
-    #              return {
-    #                  "success": False, 
-    #                  "error": "Already scanned today", 
-    #                  "code": "ALREADY_SCANNED",
-    #                  "member": member
-    #              }
-    #     except:
-    #         pass
+    # Check if scanned within last 1 hour
+    last_scanned = str(member.get('Last Scanned At', ''))
+    if last_scanned and last_scanned != '':
+        try:
+            last_scan_time = datetime.fromisoformat(last_scanned)
+            time_diff = now - last_scan_time
+            minutes_diff = time_diff.total_seconds() / 60
+            
+            if minutes_diff < 60:  # Less than 1 hour
+                remaining_minutes = int(60 - minutes_diff)
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Please wait {remaining_minutes} more minutes. Last scanned at {last_scan_time.strftime('%I:%M %p')}"
+                )
+        except HTTPException:
+            raise
+        except:
+            pass
 
     # Update Member
     # Increment Scan Count
