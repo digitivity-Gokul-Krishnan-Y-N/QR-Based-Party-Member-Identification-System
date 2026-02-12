@@ -6,6 +6,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Printer, Download, RefreshCw, UserCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
+import API_BASE_URL from '../config/api';
 import './QRGenerator.css';
 
 const QRGenerator = () => {
@@ -16,7 +17,7 @@ const QRGenerator = () => {
     const fetchMembers = async () => {
         setLoading(true);
         try {
-            const res = await axios.get('/api/stats');
+            const res = await axios.get(`${API_BASE_URL}/stats`);
             setMembers(res.data.members || []);
         } catch (err) {
             console.error(err);

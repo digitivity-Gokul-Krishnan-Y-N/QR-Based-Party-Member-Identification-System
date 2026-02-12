@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Upload, FileUp, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import API_BASE_URL from '../config/api';
 import './Admin.css'; // Will create this later, need to define glassmorphism there too.
 
 const Admin = () => {
@@ -14,7 +15,7 @@ const Admin = () => {
     const fetchStats = async () => {
         setRefreshing(true);
         try {
-            const res = await axios.get('/api/stats');
+            const res = await axios.get(`${API_BASE_URL}/stats`);
             setStats(res.data);
         } catch (err) {
             console.error("Failed to fetch stats", err);
@@ -41,7 +42,7 @@ const Admin = () => {
         setUploadStatus('uploading');
 
         try {
-            await axios.post('/api/upload', formData, {
+            await axios.post(`${API_BASE_URL}/upload`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setUploadStatus('success');

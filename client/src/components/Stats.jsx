@@ -4,6 +4,7 @@ import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { motion } from 'framer-motion';
 import { Clock, CheckSquare } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 import './Stats.css';
 
 const Stats = () => {
@@ -15,7 +16,7 @@ const Stats = () => {
 
     const fetchStats = async () => {
         try {
-            const res = await axios.get('/api/stats');
+            const res = await axios.get(`${API_BASE_URL}/stats`);
             setStats(res.data);
         } catch (err) {
             console.error("Failed to fetch stats");

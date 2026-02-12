@@ -4,6 +4,7 @@ import QrScanner from 'qr-scanner';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, XCircle, Search, User, Loader2 } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 import './Scanner.css'; // Will create this for specific styles
 
 const Scanner = () => {
@@ -24,7 +25,7 @@ const Scanner = () => {
         setLastScannedCode(code);
 
         try {
-            const response = await axios.post('/api/scan', { qrId: code });
+            const response = await axios.post(`${API_BASE_URL}/scan`, { qrId: code });
             setScanResult({ type: 'success', data: response.data });
             // Play success sound?
         } catch (err) {

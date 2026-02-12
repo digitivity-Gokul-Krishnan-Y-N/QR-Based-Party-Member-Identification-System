@@ -66,6 +66,14 @@ def save_excel(df):
 
 # Routes
 
+@app.get("/")
+async def root():
+    return {"message": "QR Party Member API is running", "status": "ok"}
+
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy", "database": os.path.exists(DB_FILE)}
+
 @app.post("/api/upload")
 async def upload_excel(file: UploadFile = File(...)):
     try:
