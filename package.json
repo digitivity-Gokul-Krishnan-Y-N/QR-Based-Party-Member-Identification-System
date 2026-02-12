@@ -1,0 +1,16 @@
+{
+  "name": "qr-party-system",
+  "version": "1.0.0",
+  "description": "QR Based Party Member Identification System",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && uvicorn main:app --reload --port 8000",
+    "client": "cd client && npm run dev",
+    "install-app": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "author": "",
+  "license": "ISC"
+}
