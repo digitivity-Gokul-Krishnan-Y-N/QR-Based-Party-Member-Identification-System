@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { QrCode, ClipboardList, BarChart3, Users } from 'lucide-react';
+import { QrCode, ClipboardList, BarChart3, Users, Server } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -28,6 +28,12 @@ const Navbar = () => {
                     <NavLink to="/generate" className={({ isActive }) => isActive ? 'active' : ''}>
                         <QrCode size={20} />
                         <span>Generator</span>
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink to="/gateways" className={({ isActive }) => isActive ? 'active' : ''}>
+                        <Server size={20} />
+                        <span>Gateways</span>
                     </NavLink>
                 </li>
                 <li>

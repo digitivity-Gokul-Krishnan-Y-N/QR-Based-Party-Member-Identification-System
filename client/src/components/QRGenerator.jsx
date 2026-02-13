@@ -69,6 +69,83 @@ const QRGenerator = () => {
         }
     };
 
+    const downloadIndividualQR = async (member, index) => {
+        try {
+            // Get the specific card element
+            const cardElement = document.getElementById(`qr-card-${index}`);
+            if (!cardElement) {
+                console.error('Card element not found');
+                return;
+            }
+
+            // Create canvas from the card
+            const canvas = await html2canvas(cardElement, {
+                scale: 3,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            });
+
+            // Convert to blob and download
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const fileName = `QR_${member['QR Code ID']}_${member.Name.replace(/\s+/g, '_')}.png`;
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        } catch (err) {
+            console.error('Failed to download QR code:', err);
+            alert('Failed to download QR code. Please try again.');
+        }
+    };
+
+    const downloadAllIndividualQRs = async () => {
+        setGenerating(true);
+        try {
+            for (let i = 0; i < validMembers.length; i++) {
+                const member = validMembers[i];
+                const cardElement = document.getElementById(`qr-card-${i}`);
+
+                if (!cardElement) continue;
+
+                const canvas = await html2canvas(cardElement, {
+                    scale: 3,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                });
+
+                await new Promise((resolve) => {
+                    canvas.toBlob((blob) => {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        const fileName = `QR_${member['QR Code ID']}_${member.Name.replace(/\s+/g, '_')}.png`;
+                        link.href = url;
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+
+                        // Small delay between downloads
+                        setTimeout(resolve, 300);
+                    }, 'image/png');
+                });
+            }
+            alert(`Successfully downloaded ${validMembers.length} QR codes!`);
+        } catch (err) {
+            console.error('Failed to download all QR codes:', err);
+            alert('Failed to download all QR codes. Please try again.');
+        } finally {
+            setGenerating(false);
+        }
+    };
+
     // Filter members who possess a QR ID
     const validMembers = members.filter(m => m['QR Code ID']);
 
@@ -84,8 +161,15 @@ const QRGenerator = () => {
                     <button onClick={fetchMembers} className="action-btn secondary" disabled={loading}>
                         <RefreshCw size={20} className={loading ? 'spin' : ''} /> Refresh
                     </button>
+                    <button
+                        onClick={downloadAllIndividualQRs}
+                        className="action-btn primary"
+                        disabled={generating || validMembers.length === 0}
+                    >
+                        {generating ? 'Downloading...' : <><Download size={20} /> Download All PNGs</>}
+                    </button>
                     <button onClick={generatePDF} className="action-btn primary" disabled={generating || validMembers.length === 0}>
-                        {generating ? 'Generating PDF...' : <><Printer size={20} /> Download Printable PDF</>}
+                        {generating ? 'Generating PDF...' : <><Printer size={20} /> Download PDF</>}
                     </button>
                 </div>
             </div>
@@ -95,6 +179,7 @@ const QRGenerator = () => {
                 {validMembers.map((member, index) => (
                     <motion.div
                         key={index}
+                        id={`qr-card-${index}`}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.05 }}
@@ -117,6 +202,13 @@ const QRGenerator = () => {
                             <p className="member-id">{member['QR Code ID']}</p>
                             <p className="member-constituency">{member.Constituency} ({member['Constituency Number']})</p>
                         </div>
+                        <button
+                            className="download-individual-btn"
+                            onClick={() => downloadIndividualQR(member, index)}
+                            title="Download this QR code"
+                        >
+                            <Download size={16} /> Download
+                        </button>
                     </motion.div>
                 ))}
             </div>
