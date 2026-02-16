@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Upload, FileUp, CheckCircle, AlertTriangle, RefreshCw, Clock, Database } from 'lucide-react';
+import { Upload, FileUp, CheckCircle, AlertTriangle, RefreshCw, Clock, Database, AlertCircle, Inbox } from 'lucide-react';
 import { motion } from 'framer-motion';
 import API_BASE_URL from '../config/api';
 import './Admin.css';
@@ -12,6 +12,7 @@ const Admin = () => {
     const [uploadResult, setUploadResult] = useState(null);
     const [stats, setStats] = useState({ totalMembers: 0, scannedToday: 0, members: [] });
     const [refreshing, setRefreshing] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [gateways, setGateways] = useState([]);
     const [selectedGateway, setSelectedGateway] = useState('GATEWAY-001');
     const [uploadHistory, setUploadHistory] = useState([]);
@@ -64,9 +65,17 @@ const Admin = () => {
     };
 
     useEffect(() => {
-        fetchGateways();
-        fetchStats();
-        fetchUploadHistory();
+        const initializeData = async () => {
+            setLoading(true);
+            try {
+                await Promise.all([fetchGateways(), fetchStats(), fetchUploadHistory()]);
+            } catch (err) {
+                console.error("Failed to initialize admin data", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        initializeData();
     }, [selectedGateway]);
 
     const handleFileChange = (e) => {
@@ -125,29 +134,44 @@ const Admin = () => {
             </div>
 
             <div className="stats-grid">
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="stat-card glass-panel"
-                    whileHover={{ scale: 1.02, y: -5 }}
-                    transition={{ type: 'spring', stiffness: 200 }}
-                >
-                    <h3>Total Members</h3>
-                    <div className="stat-value">{stats.totalMembers}</div>
-                    <p className="stat-label">in {selectedGateway}</p>
-                </motion.div>
+                {loading ? (
+                    <>
+                        <motion.div className="stat-card glass-panel" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                            <Clock size={32} className="loading-spinner" />
+                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Loading...</p>
+                        </motion.div>
+                        <motion.div className="stat-card glass-panel" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+                            <Clock size={32} className="loading-spinner" />
+                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Loading...</p>
+                        </motion.div>
+                    </>
+                ) : (
+                    <>
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="stat-card glass-panel"
+                            whileHover={{ scale: 1.02, y: -5 }}
+                            transition={{ type: 'spring', stiffness: 200 }}
+                        >
+                            <h3>Total Members</h3>
+                            <div className="stat-value">{stats.totalMembers || '0'}</div>
+                            <p className="stat-label">in {selectedGateway}</p>
+                        </motion.div>
 
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-                    className="stat-card glass-panel"
-                    whileHover={{ scale: 1.02, y: -5 }}
-                >
-                    <h3>Scanned Today</h3>
-                    <div className="stat-value">{stats.scannedToday}</div>
-                    <p className="stat-label">valid scans</p>
-                </motion.div>
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
+                            className="stat-card glass-panel"
+                            whileHover={{ scale: 1.02, y: -5 }}
+                        >
+                            <h3>Scanned Today</h3>
+                            <div className="stat-value">{stats.scannedToday || '0'}</div>
+                            <p className="stat-label">valid scans</p>
+                        </motion.div>
+                    </>
+                )}
             </div>
 
             <motion.div 
@@ -277,7 +301,11 @@ const Admin = () => {
                         className="history-list"
                     >
                         {uploadHistory.length === 0 ? (
-                            <p className="text-muted">No upload history available</p>
+                            <div className="empty-state" style={{ margin: '2rem auto', padding: '2rem', textAlign: 'center' }}>
+                                <Clock size={40} className="empty-state-icon" />
+                                <div className="empty-state-text">No upload history</div>
+                                <div className="empty-state-subtext">Uploads will appear here after files are processed</div>
+                            </div>
                         ) : (
                             <table className="history-table">
                                 <thead>
@@ -370,7 +398,13 @@ const Admin = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="6" className="text-center">No members found</td>
+                                    <td colSpan="6" className="text-center">
+                                        <div className="empty-state" style={{ margin: '2rem 0', borderRadius: '8px' }}>
+                                            <Inbox size={40} className="empty-state-icon" />
+                                            <div className="empty-state-text">No members found</div>
+                                            <div className="empty-state-subtext">Upload an Excel file to populate member data</div>
+                                        </div>
+                                    </td>
                                 </tr>
                             )}
                         </tbody>
