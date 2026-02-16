@@ -415,9 +415,18 @@
 }
 
 .empty-state-icon {
-    font-size: 3rem;
-    opacity: 0.3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
     margin-bottom: 0.5rem;
+    color: var(--color-accent);
+}
+
+.empty-state-icon svg {
+    opacity: 0.3;
+    width: 48px;
+    height: 48px;
 }
 
 .empty-state-text {
@@ -443,8 +452,16 @@
 }
 
 .loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     animation: spin 2s linear infinite;
     color: var(--color-accent);
+}
+
+.loading-spinner svg {
+    width: 24px;
+    height: 24px;
 }
 
 @keyframes spin {
