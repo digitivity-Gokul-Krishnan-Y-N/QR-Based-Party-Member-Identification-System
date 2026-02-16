@@ -296,26 +296,26 @@ const QRGenerator = () => {
             {loading ? (
                 <motion.div
                     className="qr-grid-preview"
-                    style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                 >
-                    <div style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-                        <RefreshCw size={40} style={{ animation: 'spin 2s linear infinite', marginBottom: '1rem', display: 'inline-block' }} />
+                    <div className="loading-state">
+                        <RefreshCw size={40} className="loading-spinner" />
                         <p>Loading QR codes...</p>
                     </div>
                 </motion.div>
             ) : validMembers.length === 0 ? (
                 <motion.div
                     className="qr-grid-preview"
-                    style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                 >
-                    <div style={{ textAlign: 'center', padding: '2rem' }}>
-                        <Inbox size={48} style={{ color: 'rgba(59, 130, 246, 0.3)', marginBottom: '1.5rem' }} />
-                        <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '0.5rem', fontSize: '1.2rem' }}>No Members with QR Code IDs</h3>
-                        <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Upload a file with members in the Admin panel to generate QR codes</p>
+                    <div className="empty-state">
+                        <div className="empty-state-icon">
+                            <Inbox size={48} />
+                        </div>
+                        <h3 className="empty-state-title">No Members with QR Code IDs</h3>
+                        <p className="empty-state-message">Upload a file with members in the Admin panel to generate QR codes</p>
                     </div>
                 </motion.div>
             ) : (
