@@ -20,9 +20,9 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.3s ease;
-  --transition-slow: 0.5s ease;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
@@ -96,6 +96,11 @@ body {
 
 .btn-primary:hover::before {
   left: 100%;
+}
+
+.btn-primary {
+  will-change: transform, box-shadow;
+  backface-visibility: hidden;
 }
 
 .btn-primary:hover {
@@ -173,10 +178,12 @@ body {
   from {
     opacity: 0;
     transform: translateY(20px);
+    backface-visibility: hidden;
   }
   to {
     opacity: 1;
     transform: translateY(0);
+    backface-visibility: hidden;
   }
 }
 
@@ -184,28 +191,32 @@ body {
   from {
     opacity: 0;
     transform: translateX(-20px);
+    backface-visibility: hidden;
   }
   to {
     opacity: 1;
     transform: translateX(0);
+    backface-visibility: hidden;
   }
 }
 
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), inset 0 0 20px rgba(59, 130, 246, 0.1);
   }
   50% {
-    box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), inset 0 0 20px rgba(59, 130, 246, 0.2);
   }
 }
 
 @keyframes spin-slow {
   from {
     transform: rotate(0deg);
+    backface-visibility: hidden;
   }
   to {
     transform: rotate(360deg);
+    backface-visibility: hidden;
   }
 }
 
@@ -275,6 +286,8 @@ body {
   transition: all var(--transition-normal);
   border: 1px solid rgba(59, 130, 246, 0.1);
   cursor: pointer;
+  will-change: transform, border-color, box-shadow;
+  backface-visibility: hidden;
 }
 
 .card-item:hover {

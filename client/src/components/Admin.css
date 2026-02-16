@@ -2,11 +2,7 @@
     padding: 1.5rem;
     max-width: 900px;
     margin: 0 auto;
-    animation: fade-in 0.5s ease-out;
-}
-
-.admin-header {
-    margin-bottom: 2.5rem;
+  animation: fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     text-align: center;
 }
 
@@ -49,7 +45,8 @@
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: background, border-color, box-shadow;
 }
 
 .gateway-selector:hover,
@@ -73,7 +70,9 @@
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(192, 132, 252, 0.1));
     border: 1px solid rgba(59, 130, 246, 0.2);
     border-radius: 16px;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, border-color, box-shadow;
+    backface-visibility: hidden;
 }
 
 .stat-card:hover {
@@ -109,15 +108,8 @@
     margin-bottom: 2.5rem;
     position: relative;
     border-radius: 16px;
-    transition: all 0.3s ease;
-}
-
-.upload-section:hover {
-    border-color: rgba(59, 130, 246, 0.6);
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(192, 132, 252, 0.1));
-    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
-}
-
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: border-color, background, box-shadow;
 .upload-icon {
     font-size: 3rem;
     margin-bottom: 1rem;
@@ -170,6 +162,7 @@
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 15px var(--color-accent-glow);
+    backface-visibility: hidden;
 }
 
 .upload-submit-btn {
@@ -206,7 +199,9 @@
     gap: 0.75rem;
     margin-top: 1.5rem;
     font-weight: 600;
-    padding: 1.2rem 1.5rem;
+    padding: 1.2rem 1.5rem4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform, opacity;
+    backface-visibility: hidden
     border-radius: 12px;
     animation: slide-in 0.3s ease-out;
 }
