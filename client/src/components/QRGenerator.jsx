@@ -300,7 +300,9 @@ const QRGenerator = () => {
                     animate={{ opacity: 1 }}
                 >
                     <div className="loading-state">
-                        <RefreshCw size={40} className="loading-spinner" />
+                        <div className="loading-spinner">
+                            <RefreshCw size={40} />
+                        </div>
                         <p>Loading QR codes...</p>
                     </div>
                 </motion.div>
