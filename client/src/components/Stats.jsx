@@ -51,7 +51,9 @@ const Stats = () => {
 
     return (
         <div className="stats-container">
-            <h2 className="title-gradient">Live Dashboard</h2>
+            <div className="stats-header">
+                <h1>Live Dashboard</h1>
+            </div>
 
             <div className="kpi-row">
                 <motion.div
@@ -83,18 +85,33 @@ const Stats = () => {
 
             <div className="chart-container glass-panel">
                 <h3>Hourly Activity</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-                        <XAxis dataKey="hour" stroke="#94a3b8" />
-                        <YAxis stroke="#94a3b8" />
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
-                            itemStyle={{ color: '#3b82f6' }}
-                        />
-                        <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                </ResponsiveContainer>
+                {chartData.some(d => d.count > 0) ? (
+                    <ResponsiveContainer width="100%" height={320}>
+                        <BarChart data={chartData} margin={{ top: 20, right: 20, left: -10, bottom: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" vertical={false} />
+                            <XAxis dataKey="hour" stroke="#94a3b8" tick={{ fontSize: 12 }} />
+                            <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
+                            <Tooltip
+                                contentStyle={{ 
+                                    backgroundColor: 'rgba(15, 23, 42, 0.95)', 
+                                    borderColor: '#3b82f6',
+                                    borderRadius: 8,
+                                    border: '1px solid rgb(59, 130, 246)',
+                                    color: '#f8fafc',
+                                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)'
+                                }}
+                                itemStyle={{ color: '#60a5fa' }}
+                                cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
+                            />
+                            <Bar dataKey="count" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="chart-empty-state">
+                        <p className="empty-text">No scans recorded yet today</p>
+                        <p className="empty-subtext">Activity will appear here as members are scanned</p>
+                    </div>
+                )}
             </div>
 
             <div className="recent-list glass-panel">
