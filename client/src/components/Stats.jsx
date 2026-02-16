@@ -3,11 +3,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { motion } from 'framer-motion';
-import { Clock, CheckSquare, TrendingUp } from 'lucide-react';
+import { Clock, CheckSquare, TrendingUp, Loader2 } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 import './Stats.css';
 
 const Stats = () => {
+    const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         totalMembers: 0,
         scannedToday: 0,
@@ -19,7 +20,13 @@ const Stats = () => {
             const res = await axios.get(`${API_BASE_URL}/stats`);
             setStats(res.data);
         } catch (err) {
-            console.error("Failed to fetch stats");
+            console.error("Failed to fetch stats", {
+                status: err.response?.status,
+                message: err.message,
+                url: `${API_BASE_URL}/stats`
+            });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -102,59 +109,80 @@ const Stats = () => {
                 initial="hidden"
                 animate="visible"
             >
-                <motion.div
-                    className="kpi-card glass-panel"
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                >
-                    <motion.div 
-                        className="kpi-icon"
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                    >
-                        <Clock size={32} />
-                    </motion.div>
-                    <div className="kpi-content">
-                        <h3>Scanned Today</h3>
-                        <motion.div 
-                            className="kpi-value"
-                            key={stats.scannedToday}
-                            initial={{ scale: 1.2, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.4 }}
+                {loading ? (
+                    <>
+                        <motion.div
+                            className="kpi-card glass-panel"
+                            variants={itemVariants}
                         >
-                            {stats.scannedToday}
+                            <Loader2 size={32} className="loading-spinner" style={{ animation: 'spin 2s linear infinite' }} />
+                            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Loading...</p>
                         </motion.div>
-                    </div>
-                </motion.div>
+                        <motion.div
+                            className="kpi-card glass-panel"
+                            variants={itemVariants}
+                        >
+                            <Loader2 size={32} className="loading-spinner" style={{ animation: 'spin 2s linear infinite' }} />
+                            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Loading...</p>
+                        </motion.div>
+                    </>
+                ) : (
+                    <>
+                        <motion.div
+                            className="kpi-card glass-panel"
+                            variants={itemVariants}
+                            whileHover={{ scale: 1.05, y: -5 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                        >
+                            <motion.div 
+                                className="kpi-icon"
+                                animate={{ rotate: [0, 10, -10, 0] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                            >
+                                <Clock size={32} />
+                            </motion.div>
+                            <div className="kpi-content">
+                                <h3>Scanned Today</h3>
+                                <motion.div 
+                                    className="kpi-value"
+                                    key={stats.scannedToday}
+                                    initial={{ scale: 1.2, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ duration: 0.4 }}
+                                >
+                                    {stats.scannedToday || '0'}
+                                </motion.div>
+                            </div>
+                        </motion.div>
 
-                <motion.div
-                    className="kpi-card glass-panel"
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                >
-                    <motion.div 
-                        className="kpi-icon"
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                    >
-                        <CheckSquare size={32} />
-                    </motion.div>
-                    <div className="kpi-content">
-                        <h3>Total Members</h3>
-                        <motion.div 
-                            className="kpi-value"
-                            key={stats.totalMembers}
-                            initial={{ scale: 1.2, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.4 }}
+                        <motion.div
+                            className="kpi-card glass-panel"
+                            variants={itemVariants}
+                            whileHover={{ scale: 1.05, y: -5 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                         >
-                            {stats.totalMembers}
+                            <motion.div 
+                                className="kpi-icon"
+                                animate={{ scale: [1, 1.1, 1] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                            >
+                                <CheckSquare size={32} />
+                            </motion.div>
+                            <div className="kpi-content">
+                                <h3>Total Members</h3>
+                                <motion.div 
+                                    className="kpi-value"
+                                    key={stats.totalMembers}
+                                    initial={{ scale: 1.2, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ duration: 0.4 }}
+                                >
+                                    {stats.totalMembers || '0'}
+                                </motion.div>
+                            </div>
                         </motion.div>
-                    </div>
-                </motion.div>
+                    </>
+                )}
             </motion.div>
 
             <motion.div 
