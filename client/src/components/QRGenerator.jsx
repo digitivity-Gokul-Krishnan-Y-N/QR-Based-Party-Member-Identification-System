@@ -5,7 +5,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Printer, Download, RefreshCw, UserCheck } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import API_BASE_URL from '../config/api';
 import './QRGenerator.css';
 
@@ -13,6 +13,7 @@ const QRGenerator = () => {
     const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [generating, setGenerating] = useState(false);
+    const [toast, setToast] = useState(null);
 
     const fetchMembers = async () => {
         setLoading(true);
@@ -61,11 +62,13 @@ const QRGenerator = () => {
             }
 
             pdf.save('member_qr_codes.pdf');
+            setToast({ type: 'success', message: 'PDF downloaded successfully!' });
         } catch (err) {
             console.error("PDF Generation failed:", err);
-            alert("Failed to generate PDF. Check console for details.");
+            setToast({ type: 'error', message: 'Failed to generate PDF. Check console for details.' });
         } finally {
             setGenerating(false);
+            setTimeout(() => setToast(null), 3000);
         }
     };
 
@@ -100,7 +103,8 @@ const QRGenerator = () => {
             }, 'image/png');
         } catch (err) {
             console.error('Failed to download QR code:', err);
-            alert('Failed to download QR code. Please try again.');
+            setToast({ type: 'error', message: 'Failed to download QR code. Please try again.' });
+            setTimeout(() => setToast(null), 3000);
         }
     };
 
@@ -137,87 +141,231 @@ const QRGenerator = () => {
                     }, 'image/png');
                 });
             }
-            alert(`Successfully downloaded ${validMembers.length} QR codes!`);
+            setToast({ type: 'success', message: `Successfully downloaded ${validMembers.length} QR codes!` });
         } catch (err) {
             console.error('Failed to download all QR codes:', err);
-            alert('Failed to download all QR codes. Please try again.');
+            setToast({ type: 'error', message: 'Failed to download all QR codes. Please try again.' });
         } finally {
             setGenerating(false);
+            setTimeout(() => setToast(null), 3000);
         }
     };
 
     // Filter members who possess a QR ID
     const validMembers = members.filter(m => m['QR Code ID']);
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.05,
+                delayChildren: 0.2,
+            },
+        },
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, scale: 0.9 },
+        visible: {
+            opacity: 1,
+            scale: 1,
+            transition: { duration: 0.4, ease: 'easeOut' },
+        },
+    };
+
     return (
-        <div className="generator-container">
-            <h2 className="title-gradient">QR Code Generator</h2>
-            <div className="generator-actions glass-panel">
-                <div className="action-info">
-                    <UserCheck size={24} color="#3b82f6" />
+        <motion.div 
+            className="generator-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+        >
+            <motion.h2 
+                className="title-gradient"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+            >
+                QR Code Generator
+            </motion.h2>
+
+            <motion.div 
+                className="generator-actions glass-panel"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.5 }}
+                whileHover={{ boxShadow: '0 10px 40px rgba(59, 130, 246, 0.2)' }}
+            >
+                <motion.div 
+                    className="action-info"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    <motion.div
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                    >
+                        <UserCheck size={24} color="#3b82f6" />
+                    </motion.div>
                     <span>Total Members with IDs: <strong>{validMembers.length}</strong></span>
-                </div>
+                </motion.div>
                 <div className="action-buttons">
-                    <button onClick={fetchMembers} className="action-btn secondary" disabled={loading}>
-                        <RefreshCw size={20} className={loading ? 'spin' : ''} /> Refresh
-                    </button>
-                    <button
+                    <motion.button 
+                        onClick={fetchMembers} 
+                        className="action-btn secondary" 
+                        disabled={loading}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <motion.div
+                            animate={loading ? { rotate: 360 } : {}}
+                            transition={loading ? { duration: 1, repeat: Infinity, ease: 'linear' } : {}}
+                            style={{ display: 'inline-block' }}
+                        >
+                            <RefreshCw size={20} />
+                        </motion.div>
+                        Refresh
+                    </motion.button>
+                    <motion.button
                         onClick={downloadAllIndividualQRs}
                         className="action-btn primary"
                         disabled={generating || validMembers.length === 0}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                     >
-                        {generating ? 'Downloading...' : <><Download size={20} /> Download All PNGs</>}
-                    </button>
-                    <button onClick={generatePDF} className="action-btn primary" disabled={generating || validMembers.length === 0}>
-                        {generating ? 'Generating PDF...' : <><Printer size={20} /> Download PDF</>}
-                    </button>
+                        {generating ? (
+                            <motion.span
+                                animate={{ opacity: [0.7, 1, 0.7] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                            >
+                                Downloading...
+                            </motion.span>
+                        ) : (
+                            <>
+                                <Download size={20} /> Download All PNGs
+                            </>
+                        )}
+                    </motion.button>
+                    <motion.button 
+                        onClick={generatePDF} 
+                        className="action-btn primary" 
+                        disabled={generating || validMembers.length === 0}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        {generating ? (
+                            <motion.span
+                                animate={{ opacity: [0.7, 1, 0.7] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                            >
+                                Generating PDF...
+                            </motion.span>
+                        ) : (
+                            <>
+                                <Printer size={20} /> Download PDF
+                            </>
+                        )}
+                    </motion.button>
                 </div>
-            </div>
+            </motion.div>
+
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                        className={`toast ${toast.type}`}
+                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    >
+                        {toast.message}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Hidden container for PDF generation - formatted for A4 grid */}
-            <div id="qr-preview-container" className="qr-grid-preview">
+            <motion.div 
+                id="qr-preview-container" 
+                className="qr-grid-preview"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
                 {validMembers.map((member, index) => (
                     <motion.div
                         key={index}
                         id={`qr-card-${index}`}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.05 }}
+                        variants={itemVariants}
                         className="qr-card"
+                        whileHover={{ 
+                            scale: 1.02,
+                            boxShadow: '0 10px 30px rgba(59, 130, 246, 0.2)',
+                            y: -5
+                        }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     >
-                        <div className="qr-header">
+                        <motion.div 
+                            className="qr-header"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.1 }}
+                        >
                             <span className="party-name">Sankalp Party</span>
-                        </div>
-                        <div className="qr-code-wrapper">
+                        </motion.div>
+                        <motion.div 
+                            className="qr-code-wrapper"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                            whileHover={{ scale: 1.1 }}
+                        >
                             <QRCodeCanvas
                                 value={String(member['QR Code ID'])}
                                 size={120}
                                 level={"H"}
                                 includeMargin={true}
                             />
-                        </div>
-                        <div className="qr-details">
+                        </motion.div>
+                        <motion.div 
+                            className="qr-details"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                        >
                             <p className="member-name">{member.Name}</p>
                             <p className="member-role">{member.Designation}</p>
                             <p className="member-id">{member['QR Code ID']}</p>
                             <p className="member-constituency">{member.Constituency} ({member['Constituency Number']})</p>
-                        </div>
-                        <button
+                        </motion.div>
+                        <motion.button
                             className="download-individual-btn"
                             onClick={() => downloadIndividualQR(member, index)}
                             title="Download this QR code"
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.95 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.4 }}
                         >
                             <Download size={16} /> Download
-                        </button>
+                        </motion.button>
                     </motion.div>
                 ))}
-            </div>
+            </motion.div>
 
             {/* Print Container (Off-screen / Absolute positioned for capture) */}
             <div className="print-hidden-wrapper">
                 <div id="qr-print-container" className="print-layout">
                     {validMembers.map((member, index) => (
-                        <div key={index} className="print-card">
+                        <motion.div
+                            key={index}
+                            className="print-card"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: index * 0.02 }}
+                        >
                             <div className="print-header">Sankalp ID Card</div>
                             <div className="print-qr">
                                 <QRCodeCanvas
@@ -232,11 +380,11 @@ const QRGenerator = () => {
                                 <div className="print-meta">{member.Constituency}</div>
                                 <div className="print-id">{member['QR Code ID']}</div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

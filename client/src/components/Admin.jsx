@@ -117,6 +117,8 @@ const Admin = () => {
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="stat-card glass-panel"
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    transition={{ type: 'spring', stiffness: 200 }}
                 >
                     <h3>Total Members</h3>
                     <div className="stat-value">{stats.totalMembers}</div>
@@ -126,8 +128,9 @@ const Admin = () => {
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
+                    transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
                     className="stat-card glass-panel"
+                    whileHover={{ scale: 1.02, y: -5 }}
                 >
                     <h3>Scanned Today</h3>
                     <div className="stat-value">{stats.scannedToday}</div>
@@ -135,7 +138,12 @@ const Admin = () => {
                 </motion.div>
             </div>
 
-            <div className="upload-section glass-panel">
+            <motion.div 
+                className="upload-section glass-panel"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+            >
                 <h3><FileUp size={24} /> Update Database</h3>
                 <p>Upload the latest .xlsx file to update member records for {selectedGateway}.</p>
 
@@ -147,51 +155,96 @@ const Admin = () => {
                         id="file-upload"
                         className="file-input"
                     />
-                    <label htmlFor="file-upload" className="file-label btn-primary">
+                    <label htmlFor="file-upload" className="file-label btn-primary"
+                        style={{
+                            transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        }}
+                    >
                         {file ? file.name : "Select Excel File"}
                     </label>
                 </div>
 
-                {file && (
-                    <button
-                        onClick={handleUpload}
-                        disabled={uploadStatus === 'uploading'}
-                        className="upload-submit-btn"
-                    >
-                        {uploadStatus === 'uploading' ? 'Uploading...' : 'Confirm Upload'}
-                    </button>
-                )}
-
-                {uploadStatus === 'success' && uploadResult && (
-                    <div className="status-msg success">
-                        <CheckCircle size={20} />
-                        <div>
-                            <strong>Upload Successful!</strong>
-                            <p>Total: {uploadResult.total} | Success: {uploadResult.successful} | Failed: {uploadResult.failed}</p>
-                            {uploadResult.errors && uploadResult.errors.length > 0 && (
-                                <details>
-                                    <summary>View Errors ({uploadResult.errors.length})</summary>
-                                    <ul className="error-list">
-                                        {uploadResult.errors.map((err, idx) => (
-                                            <li key={idx}>{err}</li>
-                                        ))}
-                                    </ul>
-                                </details>
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: file ? 1 : 0, scale: file ? 1 : 0.8 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                >
+                    {file && (
+                        <button
+                            onClick={handleUpload}
+                            disabled={uploadStatus === 'uploading'}
+                            className="upload-submit-btn"
+                            style={{
+                                cursor: uploadStatus === 'uploading' ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            {uploadStatus === 'uploading' ? (
+                                <motion.span
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 1, repeat: Infinity }}
+                                >
+                                    ⚙️ Uploading...
+                                </motion.span>
+                            ) : (
+                                'Confirm Upload'
                             )}
-                        </div>
-                    </div>
-                )}
+                        </button>
+                    )}
+                </motion.div>
 
-                {uploadStatus === 'error' && (
-                    <div className="status-msg error">
-                        <AlertTriangle size={20} />
-                        <div>
-                            <strong>Upload Failed</strong>
-                            <p>{uploadResult?.message || 'Check file format and try again'}</p>
-                        </div>
-                    </div>
-                )}
-            </div>
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: uploadStatus === 'success' ? 1 : 0, y: uploadStatus === 'success' ? 0 : -10 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                >
+                    {uploadStatus === 'success' && uploadResult && (
+                        <motion.div className="status-msg success"
+                            whileIn={{ scale: [0.95, 1] }}
+                        >
+                            <CheckCircle size={20} />
+                            <div>
+                                <strong>Upload Successful!</strong>
+                                <p>Total: {uploadResult.total} | Success: {uploadResult.successful} | Failed: {uploadResult.failed}</p>
+                                {uploadResult.errors && uploadResult.errors.length > 0 && (
+                                    <details>
+                                        <summary>View Errors ({uploadResult.errors.length})</summary>
+                                        <ul className="error-list">
+                                            {uploadResult.errors.map((err, idx) => (
+                                                <motion.li key={idx}
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: idx * 0.05 }}
+                                                >
+                                                    {err}
+                                                </motion.li>
+                                            ))}
+                                        </ul>
+                                    </details>
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
+                </motion.div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: uploadStatus === 'error' ? 1 : 0, y: uploadStatus === 'error' ? 0 : -10 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                >
+                    {uploadStatus === 'error' && uploadResult && (
+                        <motion.div className="status-msg error"
+                            whileIn={{ scale: [0.95, 1] }}
+                        >
+                            <AlertTriangle size={20} />
+                            <div>
+                                <strong>Upload Failed!</strong>
+                                <p>{uploadResult.message}</p>
+                            </div>
+                        </motion.div>
+                    )}
+                </motion.div>
+            </motion.div>
 
             {/* Upload History */}
             <div className="upload-history glass-panel">
@@ -227,14 +280,23 @@ const Admin = () => {
                                 </thead>
                                 <tbody>
                                     {uploadHistory.map((batch, idx) => (
-                                        <tr key={idx}>
+                                        <motion.tr 
+                                            key={idx}
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: idx * 0.05, duration: 0.3 }}
+                                            whileHover={{ 
+                                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                                transition: { duration: 0.2 }
+                                            }}
+                                        >
                                             <td className="batch-id">{batch.batch_id}</td>
                                             <td>{batch.file_name}</td>
                                             <td>{new Date(batch.upload_date).toLocaleString()}</td>
                                             <td>{batch.total_records}</td>
                                             <td className="success-count">{batch.successful_records}</td>
                                             <td className="failed-count">{batch.failed_records}</td>
-                                        </tr>
+                                        </motion.tr>
                                     ))}
                                 </tbody>
                             </table>
@@ -244,7 +306,12 @@ const Admin = () => {
             </div>
 
             {/* Member List Table */}
-            <div className="members-section glass-panel">
+            <motion.div 
+                className="members-section glass-panel"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+            >
                 <h3>Member Scan History</h3>
                 <div className="table-container">
                     <table className="members-table">
@@ -261,7 +328,18 @@ const Admin = () => {
                         <tbody>
                             {stats.members && stats.members.length > 0 ? (
                                 stats.members.map((member, index) => (
-                                    <tr key={index}>
+                                    <motion.tr 
+                                        key={index}
+                                        className="table-row-hover"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.05, duration: 0.3 }}
+                                        whileHover={{ 
+                                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                            paddingLeft: '5px',
+                                            transition: { duration: 0.2 }
+                                        }}
+                                    >
                                         <td>{member.Name}</td>
                                         <td>{member.Designation}</td>
                                         <td>{member['QR Code ID']}</td>
@@ -276,7 +354,7 @@ const Admin = () => {
                                                 : <span className="text-muted">-</span>}
                                         </td>
                                         <td className="text-center">{member['Scan Count'] || 0}</td>
-                                    </tr>
+                                    </motion.tr>
                                 ))
                             ) : (
                                 <tr>
@@ -286,7 +364,7 @@ const Admin = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </motion.div>
 
             <button onClick={fetchStats} className="refresh-btn">
                 <RefreshCw size={20} className={refreshing ? 'spin' : ''} /> Refresh Data
