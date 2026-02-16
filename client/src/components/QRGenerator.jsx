@@ -4,24 +4,31 @@ import axios from 'axios';
 import { QRCodeCanvas } from 'qrcode.react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { Printer, Download, RefreshCw, UserCheck } from 'lucide-react';
+import { Printer, Download, RefreshCw, UserCheck, AlertCircle, Inbox } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_BASE_URL from '../config/api';
 import './QRGenerator.css';
 
 const QRGenerator = () => {
     const [members, setMembers] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
+    const [error, setError] = useState(null);
     const [toast, setToast] = useState(null);
 
     const fetchMembers = async () => {
         setLoading(true);
+        setError(null);
         try {
             const res = await axios.get(`${API_BASE_URL}/stats`);
             setMembers(res.data.members || []);
         } catch (err) {
-            console.error(err);
+            console.error("Failed to fetch members:", {
+                status: err.response?.status,
+                message: err.message,
+                url: `${API_BASE_URL}/stats`
+            });
+            setError('Failed to load member data');
         } finally {
             setLoading(false);
         }
@@ -286,74 +293,101 @@ const QRGenerator = () => {
             </AnimatePresence>
 
             {/* Hidden container for PDF generation - formatted for A4 grid */}
-            <motion.div 
-                id="qr-preview-container" 
-                className="qr-grid-preview"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-            >
-                {validMembers.map((member, index) => (
-                    <motion.div
-                        key={index}
-                        id={`qr-card-${index}`}
-                        variants={itemVariants}
-                        className="qr-card"
-                        whileHover={{ 
-                            scale: 1.02,
-                            boxShadow: '0 10px 30px rgba(59, 130, 246, 0.2)',
-                            y: -5
-                        }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                    >
-                        <motion.div 
-                            className="qr-header"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.1 }}
+            {loading ? (
+                <motion.div
+                    className="qr-grid-preview"
+                    style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                >
+                    <div style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>
+                        <RefreshCw size={40} style={{ animation: 'spin 2s linear infinite', marginBottom: '1rem', display: 'inline-block' }} />
+                        <p>Loading QR codes...</p>
+                    </div>
+                </motion.div>
+            ) : validMembers.length === 0 ? (
+                <motion.div
+                    className="qr-grid-preview"
+                    style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>
+                        <Inbox size={48} style={{ color: 'rgba(59, 130, 246, 0.3)', marginBottom: '1.5rem' }} />
+                        <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '0.5rem', fontSize: '1.2rem' }}>No Members with QR Code IDs</h3>
+                        <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Upload a file with members in the Admin panel to generate QR codes</p>
+                    </div>
+                </motion.div>
+            ) : (
+                <motion.div 
+                    id="qr-preview-container" 
+                    className="qr-grid-preview"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    {validMembers.map((member, index) => (
+                        <motion.div
+                            key={index}
+                            id={`qr-card-${index}`}
+                            variants={itemVariants}
+                            className="qr-card"
+                            whileHover={{ 
+                                scale: 1.02,
+                                boxShadow: '0 10px 30px rgba(59, 130, 246, 0.2)',
+                                y: -5
+                            }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                         >
-                            <span className="party-name">Sankalp Party</span>
+                            <motion.div 
+                                className="qr-header"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.1 }}
+                            >
+                                <span className="party-name">Sankalp Party</span>
+                            </motion.div>
+                            <motion.div 
+                                className="qr-code-wrapper"
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                                whileHover={{ scale: 1.1 }}
+                            >
+                                <QRCodeCanvas
+                                    value={String(member['QR Code ID'])}
+                                    size={120}
+                                    level={"H"}
+                                    includeMargin={true}
+                                />
+                            </motion.div>
+                            <motion.div 
+                                className="qr-details"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                            >
+                                <p className="member-name">{member.Name}</p>
+                                <p className="member-role">{member.Designation}</p>
+                                <p className="member-id">{member['QR Code ID']}</p>
+                                <p className="member-constituency">{member.Constituency}</p>
+                            </motion.div>
+                            <motion.button
+                                className="download-individual-btn"
+                                onClick={() => downloadIndividualQR(member, index)}
+                                title="Download this QR code"
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.4 }}
+                            >
+                                <Download size={16} /> Download
+                            </motion.button>
                         </motion.div>
-                        <motion.div 
-                            className="qr-code-wrapper"
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                            whileHover={{ scale: 1.1 }}
-                        >
-                            <QRCodeCanvas
-                                value={String(member['QR Code ID'])}
-                                size={120}
-                                level={"H"}
-                                includeMargin={true}
-                            />
-                        </motion.div>
-                        <motion.div 
-                            className="qr-details"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                        >
-                            <p className="member-name">{member.Name}</p>
-                            <p className="member-role">{member.Designation}</p>
-                            <p className="member-id">{member['QR Code ID']}</p>
-                            <p className="member-constituency">{member.Constituency} ({member['Constituency Number']})</p>
-                        </motion.div>
-                        <motion.button
-                            className="download-individual-btn"
-                            onClick={() => downloadIndividualQR(member, index)}
-                            title="Download this QR code"
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            whileTap={{ scale: 0.95 }}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                        >
-                            <Download size={16} /> Download
-                        </motion.button>
-                    </motion.div>
-                ))}
-            </motion.div>
+                    ))}
+                </motion.div>
+            )}
 
             {/* Print Container (Off-screen / Absolute positioned for capture) */}
             <div className="print-hidden-wrapper">
