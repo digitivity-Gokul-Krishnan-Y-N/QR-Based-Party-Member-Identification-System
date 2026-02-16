@@ -20,6 +20,10 @@ PROD_API_URL = PROD_API_URL || "/api";
 const API_BASE_URL =
   import.meta.env.MODE === "production" ? PROD_API_URL : DEV_API_URL;
 
-console.log('API_BASE_URL:', API_BASE_URL); // Debug log
+console.log('API Configuration:', {
+  mode: import.meta.env.MODE,
+  API_BASE_URL,
+  VITE_API_URL: import.meta.env.VITE_API_URL
+});
 
 export default API_BASE_URL;

@@ -48,7 +48,8 @@ const Scanner = () => {
                 {
                     highlightScanRegion: true,
                     highlightCodeOutline: true,
-                    returnDetailedScanResult: true
+                    returnDetailedScanResult: true,
+                    willReadFrequently: true
                 }
             );
             qrScanner.start().then(() => {

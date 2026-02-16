@@ -22,7 +22,11 @@ const Admin = () => {
             const res = await axios.get(`${API_BASE_URL}/gateways/active`);
             setGateways(res.data.gateways);
         } catch (err) {
-            console.error("Failed to fetch gateways", err);
+            console.error("Failed to fetch gateways:", {
+                status: err.response?.status,
+                message: err.message,
+                url: `${API_BASE_URL}/gateways/active`
+            });
         }
     };
 
@@ -34,7 +38,11 @@ const Admin = () => {
             });
             setStats(res.data);
         } catch (err) {
-            console.error("Failed to fetch stats", err);
+            console.error("Failed to fetch stats:", {
+                status: err.response?.status,
+                message: err.message,
+                url: `${API_BASE_URL}/stats`
+            });
         } finally {
             setRefreshing(false);
         }
@@ -47,7 +55,11 @@ const Admin = () => {
             });
             setUploadHistory(res.data.history);
         } catch (err) {
-            console.error("Failed to fetch upload history", err);
+            console.error("Failed to fetch upload history:", {
+                status: err.response?.status,
+                message: err.message,
+                url: `${API_BASE_URL}/upload/history`
+            });
         }
     };
 
