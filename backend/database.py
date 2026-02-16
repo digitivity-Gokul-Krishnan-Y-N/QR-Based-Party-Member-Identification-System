@@ -269,27 +269,33 @@ class Database:
         if upload_date > current_time:
             return False, "Invalid: Member data uploaded in future", member
         
-        # Check for duplicate scans today
+        # Check for duplicate scans today (across ALL gateways)
         conn = self.get_connection()
         cursor = conn.cursor()
         today = datetime.now().date()
         
         cursor.execute("""
             SELECT * FROM scan_history 
-            WHERE member_id = ? AND scan_date = ? AND gateway_id = ?
+            WHERE member_id = ? AND scan_date = ? AND is_valid = 1
             ORDER BY scanned_at DESC LIMIT 1
-        """, (member['id'], today, gateway_id))
+        """, (member['id'], today))
         
         last_scan = cursor.fetchone()
         conn.close()
         
         if last_scan:
+            scanned_gateway = last_scan['gateway_id']
             last_scan_time = datetime.fromisoformat(last_scan['scanned_at'])
-            time_diff = (current_time - last_scan_time).total_seconds() / 60
             
-            if time_diff < 60:  # Less than 1 hour
+            if scanned_gateway == gateway_id:
+                # Same gateway - show time-based message
+                time_diff = (current_time - last_scan_time).total_seconds() / 60
                 remaining = int(60 - time_diff)
-                return False, f"Already scanned. Wait {remaining} more minutes", member
+                return False, f"Already scanned at this gate. Wait {remaining} more minutes", member
+            else:
+                # Different gateway - blocked for the day
+                scan_time = last_scan_time.strftime("%I:%M %p")
+                return False, f"Already scanned today at {scanned_gateway} at {scan_time}", member
         
         return True, "Valid scan", member
     

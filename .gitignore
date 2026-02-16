@@ -16,6 +16,8 @@ ENV/
 # Uploads and Database
 backend/uploads/
 *.xlsx
+*.db
+backend/party_members.db
 
 # Build outputs
 client/dist/
