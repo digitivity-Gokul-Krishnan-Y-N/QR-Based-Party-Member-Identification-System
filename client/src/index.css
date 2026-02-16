@@ -238,3 +238,4 @@ button, a, .clickable {
 
 button:active, a:active {
   transform: scale(0.98);
+}
