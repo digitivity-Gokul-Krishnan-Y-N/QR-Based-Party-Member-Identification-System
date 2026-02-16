@@ -115,14 +115,18 @@ const Stats = () => {
                             className="kpi-card glass-panel"
                             variants={itemVariants}
                         >
-                            <Loader2 size={32} className="loading-spinner" style={{ animation: 'spin 2s linear infinite' }} />
+                            <div className="loading-spinner">
+                                <Loader2 size={32} />
+                            </div>
                             <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Loading...</p>
                         </motion.div>
                         <motion.div
                             className="kpi-card glass-panel"
                             variants={itemVariants}
                         >
-                            <Loader2 size={32} className="loading-spinner" style={{ animation: 'spin 2s linear infinite' }} />
+                            <div className="loading-spinner">
+                                <Loader2 size={32} />
+                            </div>
                             <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Loading...</p>
                         </motion.div>
                     </>

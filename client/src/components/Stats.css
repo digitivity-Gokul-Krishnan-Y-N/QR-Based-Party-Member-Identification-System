@@ -38,6 +38,28 @@
     margin-bottom: 2rem;
 }
 
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: spin 2s linear infinite;
+    color: var(--color-accent);
+}
+
+.loading-spinner svg {
+    width: 32px;
+    height: 32px;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* Tablet Design */
 @media (max-width: 1024px) {
     .stats-container {

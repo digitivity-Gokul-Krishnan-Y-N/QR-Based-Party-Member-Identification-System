@@ -302,7 +302,9 @@ const Admin = () => {
                     >
                         {uploadHistory.length === 0 ? (
                             <div className="empty-state" style={{ margin: '2rem auto', padding: '2rem', textAlign: 'center' }}>
-                                <Clock size={40} className="empty-state-icon" />
+                                <div className="empty-state-icon">
+                                    <Clock size={40} />
+                                </div>
                                 <div className="empty-state-text">No upload history</div>
                                 <div className="empty-state-subtext">Uploads will appear here after files are processed</div>
                             </div>
@@ -400,7 +402,9 @@ const Admin = () => {
                                 <tr>
                                     <td colSpan="6" className="text-center">
                                         <div className="empty-state" style={{ margin: '2rem 0', borderRadius: '8px' }}>
-                                            <Inbox size={40} className="empty-state-icon" />
+                                            <div className="empty-state-icon">
+                                                <Inbox size={40} />
+                                            </div>
                                             <div className="empty-state-text">No members found</div>
                                             <div className="empty-state-subtext">Upload an Excel file to populate member data</div>
                                         </div>
